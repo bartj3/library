@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Book Library
 
-## Getting Started
+Personal local-first book tracker for physical books and ebooks.
 
-First, run the development server:
+## Warning
+
+This is a vibe coded application. Use it at your own risk.
+
+It is intended to be run locally on your own machine. It is not designed to be secure, hardened, multi-user, or internet-facing.
+
+Do not treat this as a production-ready application.
+
+## What It Does
+
+- track books you own
+- store `physical`, `ebook`, or `both`
+- store `unread`, `reading`, or `read`
+- add books manually
+- fetch metadata from ISBN
+- bulk import ISBNs from pasted text or CSV/text files
+- search, filter, and sort your library
+
+## Stack
+
+- Next.js
+- React
+- Prisma
+- SQLite
+- Playwright
+
+## Running Locally
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Database
 
-## Learn More
+The app uses SQLite through Prisma.
 
-To learn more about Next.js, take a look at the following resources:
+Useful commands:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run db:generate
+npm run db:migrate
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Testing
 
-## Deploy on Vercel
+Lint:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run lint
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Production build:
+
+```bash
+npm run build
+```
+
+End-to-end tests:
+
+```bash
+npm run test:e2e
+```
+
+## Notes
+
+- This app stores data locally.
+- Metadata lookup depends on external book APIs.
+- Bulk import is intended for convenience, not for perfectly clean data ingestion.
+- There is no authentication, authorization, or security review.
+- If you expose this app beyond your own machine, that is your responsibility.
