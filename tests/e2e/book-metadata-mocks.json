@@ -1,0 +1,38 @@
+{
+  "9781111111113": {
+    "title": "Bulk Import Alpha",
+    "subtitle": "Import Test Volume One",
+    "authors": ["Import Author One"],
+    "publishedDate": "2001",
+    "coverUrl": "https://example.com/import-alpha.jpg",
+    "lookupSource": "openlibrary",
+    "isbn13": "9781111111113"
+  },
+  "9782222222224": {
+    "title": "Bulk Import Beta",
+    "subtitle": "Import Test Volume Two",
+    "authors": ["Import Author Two"],
+    "publishedDate": "2002",
+    "coverUrl": "https://example.com/import-beta.jpg",
+    "lookupSource": "googlebooks",
+    "isbn13": "9782222222224"
+  },
+  "9783333333335": {
+    "title": "Bulk Import Gamma",
+    "subtitle": "Import Test Volume Three",
+    "authors": ["Import Author Three"],
+    "publishedDate": "2003",
+    "coverUrl": "https://example.com/import-gamma.jpg",
+    "lookupSource": "openlibrary",
+    "isbn13": "9783333333335"
+  },
+  "9784444444446": {
+    "title": "Bulk Import Delta",
+    "subtitle": "Import Test Volume Four",
+    "authors": ["Import Author Four"],
+    "publishedDate": "2004",
+    "coverUrl": "https://example.com/import-delta.jpg",
+    "lookupSource": "googlebooks",
+    "isbn13": "9784444444446"
+  }
+}
