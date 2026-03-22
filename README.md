@@ -86,3 +86,7 @@ npm run test:e2e
 - Bulk import is intended for convenience, not for perfectly clean data ingestion.
 - There is no authentication, authorization, or security review.
 - If you expose this app beyond your own machine, that is your responsibility.
+
+## License
+
+This project is released under the Unlicense. See [UNLICENSE](/home/bart/Development/Other/library/UNLICENSE).
