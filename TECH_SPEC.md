@@ -22,7 +22,7 @@ The app is intended for a single user on a local machine. Technical simplicity i
 
 - The app is local-only.
 - There is no authentication.
-- SQLite is the database.
+- The library is stored in a local JSON file.
 - A book may be saved without an ISBN.
 - Duplicate titles are allowed.
 - Different ISBNs are treated as distinct records.
@@ -46,8 +46,7 @@ The app is intended for a single user on a local machine. Technical simplicity i
 
 - Next.js with App Router
 - TypeScript
-- Prisma ORM
-- SQLite
+- Node.js file-backed JSON datastore
 - Route handlers or server actions for writes and metadata lookup
 - Minimal styling without a heavy component library in the first pass
 
@@ -56,15 +55,14 @@ The app is intended for a single user on a local machine. Technical simplicity i
 This is a single-project local web app.
 
 - Next.js provides the UI and local server routes.
-- Prisma manages the database schema and queries.
-- SQLite stores all persistent data in a local file.
+- Server-side code reads and writes a local JSON file.
 - External metadata lookup happens server-side via third-party book APIs.
 
 No separate backend service should be introduced for V1.
 
 ## Data Model
 
-V1 uses a single `Book` model.
+V1 uses a single `Book` record shape stored in a JSON array.
 
 ### Book Fields
 
@@ -169,9 +167,8 @@ The app should map external responses into this shape:
 ### Milestone 1
 
 - Scaffold Next.js app
-- Add Prisma and SQLite
-- Define schema
-- Run initial migration
+- Define the JSON record shape
+- Add file-backed persistence
 
 ### Milestone 2
 
@@ -197,7 +194,7 @@ V1 is complete when:
 - Books can be added manually.
 - Books can be added by ISBN with metadata autofill.
 - Fetched metadata can be edited before save.
-- Books persist in SQLite.
+- Books persist in the local JSON datastore.
 - Saved books appear on the library page.
 - The library page supports search and filtering.
 - Each book can store ownership format and reading status.
@@ -228,6 +225,6 @@ lib/
   book-metadata.ts
   queries.ts
 
-prisma/
-  schema.prisma
+data/
+  library.json
 ```

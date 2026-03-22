@@ -38,9 +38,8 @@ export default async function Home({ searchParams }: HomeProps) {
             e-reader.
           </h1>
           <p className="max-w-2xl text-base leading-7 text-stone-600">
-            This scaffold already includes the SQLite schema, Prisma client, and ISBN
-            lookup route. The next implementation slice is wiring the form to create
-            and update records.
+            Your library lives in a versionable JSON file, with ISBN lookup,
+            bulk import, and local-only management built directly into the app.
           </p>
         </div>
 

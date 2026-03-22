@@ -19,13 +19,13 @@ Do not treat this as a production-ready application.
 - fetch metadata from ISBN
 - bulk import ISBNs from pasted text or CSV/text files
 - search, filter, and sort your library
+- store the library itself in a versionable JSON file
 
 ## Stack
 
 - Next.js
 - React
-- Prisma
-- SQLite
+- local JSON datastore
 - Playwright
 
 ## Running Locally
@@ -48,16 +48,11 @@ Open:
 http://localhost:3000
 ```
 
-## Database
+## Data Storage
 
-The app uses SQLite through Prisma.
+The app stores the library in `data/library.json`.
 
-Useful commands:
-
-```bash
-npm run db:generate
-npm run db:migrate
-```
+That file is intended to live alongside the codebase so you can version control the collection itself.
 
 ## Testing
 
@@ -82,6 +77,7 @@ npm run test:e2e
 ## Notes
 
 - This app stores data locally.
+- The library datastore is a JSON file, not a database.
 - Metadata lookup depends on external book APIs.
 - Bulk import is intended for convenience, not for perfectly clean data ingestion.
 - There is no authentication, authorization, or security review.

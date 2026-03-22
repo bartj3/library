@@ -1,8 +1,9 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 
-import { db } from "@/lib/db";
 import {
   initialImportFormState,
   type ImportFormState,
@@ -10,6 +11,11 @@ import {
 } from "@/lib/import-form-state";
 import { validateIsbn } from "@/lib/isbn";
 import { lookupBookMetadata } from "@/lib/book-metadata";
+import {
+  type BookRecord,
+  replaceBooks,
+  readBooks,
+} from "@/lib/library-store";
 
 function getStringValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -47,6 +53,8 @@ export async function importBooksByIsbn(
   const seen = new Set<string>();
   const rows: ImportRowResult[] = [];
   let importedCount = 0;
+  const books = await readBooks();
+  const nextBooks: BookRecord[] = [...books];
 
   for (const input of lines) {
     const validation = validateIsbn(input);
@@ -71,17 +79,10 @@ export async function importBooksByIsbn(
 
     seen.add(validation.normalized);
 
-    const existingBook = await db.book.findFirst({
-      where: {
-        OR: [
-          { isbn10: validation.normalized },
-          { isbn13: validation.normalized },
-        ],
-      },
-      select: {
-        id: true,
-      },
-    });
+    const existingBook = nextBooks.find(
+      (book) =>
+        book.isbn10 === validation.normalized || book.isbn13 === validation.normalized,
+    );
 
     if (existingBook) {
       rows.push({
@@ -104,26 +105,27 @@ export async function importBooksByIsbn(
         continue;
       }
 
-      await db.book.create({
-        data: {
-          title: metadata.title,
-          subtitle: metadata.subtitle ?? null,
-          authors: JSON.stringify(metadata.authors),
-          isbn10:
-            validation.kind === "isbn10"
-              ? validation.normalized
-              : metadata.isbn10 ?? null,
-          isbn13:
-            validation.kind === "isbn13"
-              ? validation.normalized
-              : metadata.isbn13 ?? null,
-          publishedDate: metadata.publishedDate ?? null,
-          coverUrl: metadata.coverUrl ?? null,
-          ownedFormat,
-          readingStatus,
-          notes: null,
-          lookupSource: metadata.lookupSource,
-        },
+      nextBooks.push({
+        id: randomUUID(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isbn10:
+          validation.kind === "isbn10"
+            ? validation.normalized
+            : metadata.isbn10 ?? null,
+        isbn13:
+          validation.kind === "isbn13"
+            ? validation.normalized
+            : metadata.isbn13 ?? null,
+        title: metadata.title,
+        subtitle: metadata.subtitle ?? null,
+        authors: JSON.stringify(metadata.authors),
+        publishedDate: metadata.publishedDate ?? null,
+        coverUrl: metadata.coverUrl ?? null,
+        ownedFormat,
+        readingStatus,
+        notes: null,
+        lookupSource: metadata.lookupSource,
       });
 
       importedCount += 1;
@@ -139,6 +141,10 @@ export async function importBooksByIsbn(
         message: "Unexpected error during import.",
       });
     }
+  }
+
+  if (importedCount > 0) {
+    await replaceBooks(nextBooks);
   }
 
   revalidatePath("/");

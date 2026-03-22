@@ -1,12 +1,16 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { db } from "@/lib/db";
 import { type BookFormState } from "@/lib/book-form-state";
 import { validateIsbn } from "@/lib/isbn";
+import {
+  DuplicateIsbnError,
+  createBookRecord,
+  deleteBookRecord,
+  updateBookRecord,
+} from "@/lib/library-store";
 
 function getStringValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -71,11 +75,8 @@ function parseBookInput(formData: FormData) {
   };
 }
 
-function getPrismaErrorMessage(error: unknown) {
-  if (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === "P2002"
-  ) {
+function getSaveErrorMessage(error: unknown) {
+  if (error instanceof DuplicateIsbnError) {
     return "That ISBN already exists in your library.";
   }
 
@@ -103,9 +104,7 @@ export async function createBook(
   try {
     const data = parseBookInput(formData);
 
-    const book = await db.book.create({
-      data,
-    });
+    const book = await createBookRecord(data);
 
     revalidatePath("/");
     redirect(`/books/${book.id}`);
@@ -115,7 +114,7 @@ export async function createBook(
     }
 
     return {
-      error: getPrismaErrorMessage(error),
+      error: getSaveErrorMessage(error),
     };
   }
 }
@@ -128,10 +127,7 @@ export async function updateBook(
   try {
     const data = parseBookInput(formData);
 
-    await db.book.update({
-      where: { id },
-      data,
-    });
+    await updateBookRecord(id, data);
 
     revalidatePath("/");
     revalidatePath(`/books/${id}`);
@@ -142,15 +138,13 @@ export async function updateBook(
     }
 
     return {
-      error: getPrismaErrorMessage(error),
+      error: getSaveErrorMessage(error),
     };
   }
 }
 
 export async function deleteBook(id: string) {
-  await db.book.delete({
-    where: { id },
-  });
+  await deleteBookRecord(id);
 
   revalidatePath("/");
   redirect("/");

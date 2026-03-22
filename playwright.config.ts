@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const testDatabaseUrl = `file:./prisma/test-${Date.now()}.db`;
+const testLibraryFile = `/tmp/book-library-test-${Date.now()}.json`;
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -11,7 +11,7 @@ export default defineConfig({
   },
   webServer: {
     command:
-      `DATABASE_URL=${testDatabaseUrl} BOOK_METADATA_MOCKS_FILE=./tests/e2e/book-metadata-mocks.json npx prisma migrate deploy && DATABASE_URL=${testDatabaseUrl} BOOK_METADATA_MOCKS_FILE=./tests/e2e/book-metadata-mocks.json npm run start -- --hostname 127.0.0.1 --port 3001`,
+      `LIBRARY_DATA_FILE=${testLibraryFile} BOOK_METADATA_MOCKS_FILE=./tests/e2e/book-metadata-mocks.json npm run start -- --hostname 127.0.0.1 --port 3001`,
     url: "http://127.0.0.1:3001",
     reuseExistingServer: false,
     timeout: 120000,

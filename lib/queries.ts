@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { type BookRecord, readBooks } from "@/lib/library-store";
 
 export type LibraryQuery = {
   search?: string;
@@ -11,6 +11,7 @@ const ownedFormats = new Set(["physical", "ebook", "both"]);
 const readingStatuses = new Set(["unread", "reading", "read"]);
 
 export async function getBooks(query: LibraryQuery = {}) {
+  const books = await readBooks();
   const search = query.search?.trim() ?? "";
   const ownedFormat =
     query.ownedFormat && ownedFormats.has(query.ownedFormat) ? query.ownedFormat : undefined;
@@ -27,27 +28,49 @@ export async function getBooks(query: LibraryQuery = {}) {
         ? [{ title: "desc" as const }]
         : [{ createdAt: "desc" as const }];
 
-  return db.book.findMany({
-    where: {
-      ...(ownedFormat ? { ownedFormat } : {}),
-      ...(readingStatus ? { readingStatus } : {}),
-      ...(search
-        ? {
-            OR: [
-              { title: { contains: search } },
-              { authors: { contains: search } },
-              { isbn10: { contains: search } },
-              { isbn13: { contains: search } },
-            ],
-          }
-        : {}),
-    },
-    orderBy,
-  });
+  const normalizedSearch = search.toLowerCase();
+
+  return books
+    .filter((book) => {
+      if (ownedFormat && book.ownedFormat !== ownedFormat) {
+        return false;
+      }
+
+      if (readingStatus && book.readingStatus !== readingStatus) {
+        return false;
+      }
+
+      if (!normalizedSearch) {
+        return true;
+      }
+
+      return [
+        book.title,
+        book.authors,
+        book.isbn10 ?? "",
+        book.isbn13 ?? "",
+      ].some((value) => value.toLowerCase().includes(normalizedSearch));
+    })
+    .sort((left, right) => compareBooks(left, right, orderBy));
 }
 
 export async function getBookById(id: string) {
-  return db.book.findUnique({
-    where: { id },
-  });
+  const books = await readBooks();
+  return books.find((book) => book.id === id) ?? null;
+}
+
+function compareBooks(
+  left: BookRecord,
+  right: BookRecord,
+  orderBy: Array<Record<string, "asc" | "desc">>,
+) {
+  const [entry] = orderBy;
+  const [[field, direction]] = Object.entries(entry) as Array<
+    [keyof Pick<BookRecord, "title" | "createdAt">, "asc" | "desc"]
+  >;
+  const leftValue = left[field] ?? "";
+  const rightValue = right[field] ?? "";
+  const result = String(leftValue).localeCompare(String(rightValue));
+
+  return direction === "asc" ? result : -result;
 }
