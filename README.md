@@ -79,6 +79,7 @@ npm run test:e2e
 - This app stores data locally.
 - The library datastore is a JSON file, not a database.
 - Metadata lookup depends on external book APIs.
+- Google Books rejects anonymous API requests from many networks (HTTP 429 with a daily quota of 0). Set `GOOGLE_BOOKS_API_KEY` in `.env.local` with a [Google Cloud API key](https://console.cloud.google.com/apis/credentials) to make the Google Books fallback reliable.
 - Bulk import is intended for convenience, not for perfectly clean data ingestion.
 - There is no authentication, authorization, or security review.
 - If you expose this app beyond your own machine, that is your responsibility.

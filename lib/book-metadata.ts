@@ -88,6 +88,33 @@ async function lookupOpenLibrary(isbn: string): Promise<NormalizedBookMetadata |
   };
 }
 
+function toHttps(url: string | undefined | null) {
+  return url?.replace(/^http:\/\//, "https://");
+}
+
+// The Google Books API intermittently returns 503s (~30% of requests observed),
+// so one retry meaningfully improves lookup reliability.
+async function fetchGoogleBooks(params: URLSearchParams) {
+  const apiKey = process.env.GOOGLE_BOOKS_API_KEY;
+
+  if (apiKey) {
+    params.set("key", apiKey);
+  }
+
+  const url = `https://www.googleapis.com/books/v1/volumes?${params.toString()}`;
+  let response = await fetch(url, {
+    next: { revalidate: 60 * 60 },
+  });
+
+  if (response.status >= 500) {
+    response = await fetch(url, {
+      next: { revalidate: 60 * 60 },
+    });
+  }
+
+  return response;
+}
+
 type GoogleBooksResponse = {
   items?: Array<{
     volumeInfo?: {
@@ -113,9 +140,7 @@ async function lookupGoogleBooks(isbn: string): Promise<NormalizedBookMetadata |
     maxResults: "1",
   });
 
-  const response = await fetch(`https://www.googleapis.com/books/v1/volumes?${params.toString()}`, {
-    next: { revalidate: 60 * 60 },
-  });
+  const response = await fetchGoogleBooks(params);
 
   if (!response.ok) {
     return null;
@@ -135,11 +160,75 @@ async function lookupGoogleBooks(isbn: string): Promise<NormalizedBookMetadata |
     subtitle: volume.subtitle,
     authors: volume.authors ?? [],
     publishedDate: volume.publishedDate,
-    coverUrl: volume.imageLinks?.thumbnail ?? volume.imageLinks?.smallThumbnail,
+    coverUrl: toHttps(volume.imageLinks?.thumbnail ?? volume.imageLinks?.smallThumbnail),
     lookupSource: "googlebooks",
     isbn10: identifiers.find((entry) => entry.type === "ISBN_10")?.identifier,
     isbn13: identifiers.find((entry) => entry.type === "ISBN_13")?.identifier,
   };
+}
+
+type OpenLibrarySearchResponse = {
+  docs?: Array<{
+    cover_i?: number;
+  }>;
+};
+
+async function searchOpenLibraryCover(title: string, author?: string): Promise<string | null> {
+  const params = new URLSearchParams({
+    title,
+    limit: "1",
+    fields: "cover_i",
+  });
+
+  if (author) {
+    params.set("author", author);
+  }
+
+  const response = await fetch(`https://openlibrary.org/search.json?${params.toString()}`, {
+    next: { revalidate: 60 * 60 },
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const payload = (await response.json()) as OpenLibrarySearchResponse;
+  const coverId = payload.docs?.[0]?.cover_i;
+
+  return coverId ? `https://covers.openlibrary.org/b/id/${coverId}-L.jpg` : null;
+}
+
+async function searchGoogleBooksCover(title: string, author?: string): Promise<string | null> {
+  const query = author ? `intitle:"${title}" inauthor:"${author}"` : `intitle:"${title}"`;
+  const params = new URLSearchParams({
+    q: query,
+    maxResults: "1",
+  });
+
+  const response = await fetchGoogleBooks(params);
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const payload = (await response.json()) as GoogleBooksResponse;
+  const imageLinks = payload.items?.[0]?.volumeInfo?.imageLinks;
+
+  return toHttps(imageLinks?.thumbnail ?? imageLinks?.smallThumbnail) ?? null;
+}
+
+export async function lookupCoverByTitle(title: string, author?: string): Promise<string | null> {
+  try {
+    const openLibraryCover = await searchOpenLibraryCover(title, author);
+
+    if (openLibraryCover) {
+      return openLibraryCover;
+    }
+
+    return await searchGoogleBooksCover(title, author);
+  } catch {
+    return null;
+  }
 }
 
 export async function lookupBookMetadata(input: string): Promise<NormalizedBookMetadata | null> {
@@ -157,16 +246,17 @@ export async function lookupBookMetadata(input: string): Promise<NormalizedBookM
   }
 
   const openLibrary = await lookupOpenLibrary(normalized);
+  const googleBooks = hasUsableMetadata(openLibrary) ? null : await lookupGoogleBooks(normalized);
 
-  if (hasUsableMetadata(openLibrary)) {
-    return openLibrary;
+  const result = hasUsableMetadata(openLibrary)
+    ? openLibrary
+    : hasUsableMetadata(googleBooks)
+      ? googleBooks
+      : openLibrary ?? googleBooks;
+
+  if (result?.title && !result.coverUrl) {
+    result.coverUrl = (await lookupCoverByTitle(result.title, result.authors?.[0])) ?? undefined;
   }
 
-  const googleBooks = await lookupGoogleBooks(normalized);
-
-  if (hasUsableMetadata(googleBooks)) {
-    return googleBooks;
-  }
-
-  return openLibrary ?? googleBooks;
+  return result;
 }
