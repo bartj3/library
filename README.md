@@ -50,9 +50,18 @@ http://localhost:3000
 
 ## Data Storage
 
-The app stores the library in `data/library.json`.
+The app stores the library in `data/library.json`. The file is created automatically (as an empty library) on first run.
 
-That file is intended to live alongside the codebase so you can version control the collection itself.
+The `data/` directory is gitignored by this repo so your personal collection never ends up in a public fork. It is still meant to be version controlled — just separately: initialize a git repo inside `data/` and push it to a private remote.
+
+```bash
+cd data
+git init -b main
+printf '*.tmp\n' > .gitignore
+git add library.json .gitignore
+git commit -m "Initial library snapshot"
+gh repo create <you>/library-data --private --source=. --push
+```
 
 ## Testing
 
