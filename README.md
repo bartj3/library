@@ -69,7 +69,7 @@ npm run start:https
 
 Open `https://<your-machine-ip>:3000/scan` on the phone. Scanning uses the native `BarcodeDetector` API where available and falls back to a WASM decoder elsewhere.
 
-> **Warning**: Next.js dev mode blocks cross-origin requests to dev assets, so opening the dev server via the LAN IP (as a phone must) renders pages whose buttons silently do nothing — no errors anywhere ([vercel/next.js#91908](https://github.com/vercel/next.js/issues/91908)). This cost an evening to figure out. Your LAN IP must be listed in `allowedDevOrigins` in `next.config.ts` for dev mode to work from other devices; the production server (`npm run start:https`) is unaffected.
+> **Warning**: Next.js dev mode blocks cross-origin requests to dev assets, so opening the dev server via the LAN IP (as a phone must) renders pages whose buttons silently do nothing — no errors anywhere ([vercel/next.js#91908](https://github.com/vercel/next.js/issues/91908)). This cost an evening to figure out. `next.config.ts` allows the `192.168.*.*` range via `allowedDevOrigins` (a bare `*` is rejected by Next) — adjust it if your LAN uses `10.x` or `172.16-31.x` addresses. The production server (`npm run start:https`) is unaffected.
 
 ## Data Storage
 
