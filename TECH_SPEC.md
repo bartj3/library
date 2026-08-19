@@ -39,8 +39,7 @@ The app is intended for a single user on a local machine. Technical simplicity i
 - Purchase history
 - Multiple copies per edition
 - Tags, shelves, or reviews
-- Barcode scanning
-- Import/export
+- Export
 
 ## Technical Stack
 
@@ -94,6 +93,8 @@ V1 uses a single `Book` record shape stored in a JSON array.
 - `/`: library list page
 - `/books/new`: add-book page
 - `/books/[id]`: detail and edit page
+- `/import`: bulk import from pasted ISBNs or CSV/text files (post-V1)
+- `/scan`: camera barcode scanning into the import flow (post-V1)
 
 ### API / Server Endpoints
 
@@ -150,6 +151,11 @@ The form must allow manual creation of a record without ISBN lookup.
 - Use Google Books only when Open Library has no usable result.
 - Convert external data into one internal normalized shape.
 - Do not store raw third-party payloads in the database.
+- Send `GOOGLE_BOOKS_API_KEY` when configured; Google Books grants zero
+  anonymous quota on many networks.
+- Retry Google Books once on 5xx responses (the API is flaky).
+- When a lookup finds metadata without a cover, search covers by
+  title/author (Open Library search, then Google Books).
 
 ### Normalized Lookup Response
 
@@ -161,6 +167,15 @@ The app should map external responses into this shape:
 - `publishedDate`
 - `coverUrl`
 - `lookupSource`
+- `isbn10`
+- `isbn13`
+
+## Status
+
+All V1 milestones and acceptance criteria below are complete. Post-V1
+additions so far: bulk ISBN import, camera barcode scanning, cover
+lookup fallback by title, HTTPS serving for phone camera access, and a
+separately version-controlled (private) library datastore.
 
 ## Milestones
 
@@ -220,7 +235,7 @@ components/
   search-input.tsx
 
 lib/
-  db.ts
+  library-store.ts
   isbn.ts
   book-metadata.ts
   queries.ts
