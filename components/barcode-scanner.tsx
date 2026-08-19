@@ -74,7 +74,11 @@ function rowClasses(status: ImportRowResult["status"]) {
     return "border-emerald-200 bg-emerald-50 text-emerald-900";
   }
 
-  if (status === "duplicate-library" || status === "duplicate-input") {
+  if (
+    status === "imported-no-metadata" ||
+    status === "duplicate-library" ||
+    status === "duplicate-input"
+  ) {
     return "border-amber-200 bg-amber-50 text-amber-900";
   }
 
@@ -374,7 +378,7 @@ export function BarcodeScanner() {
                   <p className="truncate text-sm font-semibold text-stone-900">
                     {scan.lookup === "pending"
                       ? "Looking up..."
-                      : scan.title ?? "No metadata found (will be skipped)"}
+                      : scan.title ?? "No metadata found — will import with ISBN only"}
                   </p>
                   <p className="truncate text-sm text-stone-600">
                     {scan.authors?.join(", ") ?? ""}

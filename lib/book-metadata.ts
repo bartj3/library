@@ -238,11 +238,12 @@ export async function lookupBookMetadata(input: string): Promise<NormalizedBookM
     return null;
   }
 
+  // When a mocks file is configured (tests), it is exhaustive: unknown ISBNs
+  // are "not found" rather than falling through to the real APIs.
   const mocks = await loadMetadataMocks();
-  const mockedResult = mocks?.[normalized];
 
-  if (mockedResult) {
-    return mockedResult;
+  if (mocks) {
+    return mocks[normalized] ?? null;
   }
 
   const openLibrary = await lookupOpenLibrary(normalized);

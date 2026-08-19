@@ -181,6 +181,24 @@ test("can bulk import valid ISBN rows and add them to the library", async ({ pag
   await expect(page.getByText("Import Author Two")).toBeVisible();
 });
 
+test("imports a valid ISBN without metadata as an ISBN-only book", async ({ page }) => {
+  await page.goto("/import");
+  await page.locator("#isbnList").fill("9785555555557");
+  await page.getByRole("button", { name: "Import books" }).click();
+
+  await expect(page.getByText("Imported 1 of 1 rows")).toBeVisible();
+  await expect(
+    page.getByText("No metadata found — imported with ISBN only."),
+  ).toBeVisible();
+
+  await page.goto("/");
+  await page.locator("#search").fill("9785555555557");
+  await page.getByRole("button", { name: "Apply filters" }).click();
+
+  await expect(page.getByText("Unknown title (9785555555557)")).toBeVisible();
+  await expect(page.getByText("Unknown author")).toBeVisible();
+});
+
 test("can import ISBNs from an uploaded csv file", async ({ page }) => {
   await page.goto("/import");
 

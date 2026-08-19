@@ -96,11 +96,31 @@ export async function importBooksByIsbn(
     try {
       const metadata = await lookupBookMetadata(validation.normalized);
 
+      // A valid ISBN is enough to add the book: import it without metadata
+      // so it can be completed manually or re-looked-up later.
       if (!metadata) {
+        nextBooks.push({
+          id: randomUUID(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isbn10: validation.kind === "isbn10" ? validation.normalized : null,
+          isbn13: validation.kind === "isbn13" ? validation.normalized : null,
+          title: `Unknown title (${validation.normalized})`,
+          subtitle: null,
+          authors: "[]",
+          publishedDate: null,
+          coverUrl: null,
+          ownedFormat,
+          readingStatus,
+          notes: null,
+          lookupSource: null,
+        });
+
+        importedCount += 1;
         rows.push({
           input,
-          status: "not-found",
-          message: "No metadata found for this ISBN.",
+          status: "imported-no-metadata",
+          message: "No metadata found — imported with ISBN only.",
         });
         continue;
       }

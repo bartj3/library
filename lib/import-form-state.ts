@@ -2,10 +2,10 @@ export type ImportRowResult = {
   input: string;
   status:
     | "imported"
+    | "imported-no-metadata"
     | "invalid"
     | "duplicate-library"
     | "duplicate-input"
-    | "not-found"
     | "failed";
   message: string;
 };
