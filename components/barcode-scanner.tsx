@@ -85,7 +85,11 @@ function rowClasses(status: ImportRowResult["status"]) {
   return "border-rose-200 bg-rose-50 text-rose-900";
 }
 
-export function BarcodeScanner() {
+type BarcodeScannerProps = {
+  tagSuggestions?: string[];
+};
+
+export function BarcodeScanner({ tagSuggestions }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const seenRef = useRef(new Set<string>());
@@ -403,6 +407,24 @@ export function BarcodeScanner() {
           name="isbnList"
           value={scans.map((scan) => scan.isbn).join("\n")}
         />
+
+        <label className="grid gap-2" htmlFor="scan-tags">
+          <span className="text-sm font-medium text-stone-700">Tags for this batch</span>
+          <input
+            id="scan-tags"
+            name="tags"
+            placeholder="cooking, scanned-2026"
+            list="scan-tag-suggestions"
+            className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-stone-900 outline-none"
+          />
+          {tagSuggestions && tagSuggestions.length > 0 ? (
+            <datalist id="scan-tag-suggestions">
+              {tagSuggestions.map((value) => (
+                <option key={value} value={value} />
+              ))}
+            </datalist>
+          ) : null}
+        </label>
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2" htmlFor="scan-owned-format">

@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 
 import { deleteBook, updateBook } from "@/app/books/actions";
 import { BookForm } from "@/components/book-form";
-import { getBookById } from "@/lib/queries";
+import { getAllTags, getBookById } from "@/lib/queries";
+import { parseBookTags } from "@/lib/tags";
 
 type BookPageProps = {
   params: Promise<{ id: string }>;
@@ -16,6 +17,8 @@ export default async function BookPage({ params }: BookPageProps) {
   if (!book) {
     notFound();
   }
+
+  const tagSuggestions = await getAllTags();
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-10 md:px-10">
@@ -53,7 +56,9 @@ export default async function BookPage({ params }: BookPageProps) {
           readingStatus: book.readingStatus,
           notes: book.notes,
           lookupSource: book.lookupSource,
+          tags: parseBookTags(book.tags),
         }}
+        tagSuggestions={tagSuggestions}
       />
     </main>
   );

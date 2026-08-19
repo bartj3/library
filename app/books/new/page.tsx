@@ -2,8 +2,11 @@ import Link from "next/link";
 
 import { createBook } from "@/app/books/actions";
 import { BookForm } from "@/components/book-form";
+import { getAllTags } from "@/lib/queries";
 
-export default function NewBookPage() {
+export default async function NewBookPage() {
+  const tagSuggestions = await getAllTags();
+
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-10 md:px-10">
       <div className="flex items-center justify-between gap-4">
@@ -24,7 +27,7 @@ export default function NewBookPage() {
         </Link>
       </div>
 
-      <BookForm mode="create" action={createBook} />
+      <BookForm mode="create" action={createBook} tagSuggestions={tagSuggestions} />
     </main>
   );
 }

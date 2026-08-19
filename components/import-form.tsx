@@ -27,7 +27,11 @@ function rowClasses(status: ImportRowResult["status"]) {
   return "border-rose-200 bg-rose-50 text-rose-900";
 }
 
-export function ImportForm() {
+type ImportFormProps = {
+  tagSuggestions?: string[];
+};
+
+export function ImportForm({ tagSuggestions }: ImportFormProps) {
   const [formState, formAction, isPending] = useActionState(
     importBooksByIsbn,
     initialImportFormState,
@@ -110,6 +114,27 @@ export function ImportForm() {
             </label>
           </div>
         </div>
+
+        <label className="grid gap-2" htmlFor="import-tags">
+          <span className="text-sm font-medium text-stone-700">Tags for this batch</span>
+          <input
+            id="import-tags"
+            name="tags"
+            placeholder="cooking, scanned-2026"
+            list="import-tag-suggestions"
+            className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-stone-900 outline-none"
+          />
+          {tagSuggestions && tagSuggestions.length > 0 ? (
+            <datalist id="import-tag-suggestions">
+              {tagSuggestions.map((value) => (
+                <option key={value} value={value} />
+              ))}
+            </datalist>
+          ) : null}
+          <span className="text-xs text-stone-500">
+            Optional, comma-separated. Applied to every imported book.
+          </span>
+        </label>
 
         <label className="grid gap-2" htmlFor="isbnList">
           <span className="text-sm font-medium text-stone-700">ISBN list</span>

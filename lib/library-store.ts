@@ -15,6 +15,9 @@ export type BookRecord = {
   readingStatus: string;
   notes: string | null;
   lookupSource: string | null;
+  // Serialized JSON array of tag names, like `authors`. Optional because
+  // records created before tags existed do not carry the field.
+  tags?: string;
   createdAt: string;
   updatedAt: string;
 };

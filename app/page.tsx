@@ -2,13 +2,15 @@ import Link from "next/link";
 
 import { BookCard } from "@/components/book-card";
 import { LibraryFilters } from "@/components/library-filters";
-import { getBooks } from "@/lib/queries";
+import { getAllTags, getBooks } from "@/lib/queries";
+import { parseBookTags } from "@/lib/tags";
 
 type HomeProps = {
   searchParams?: Promise<{
     search?: string;
     ownedFormat?: string;
     readingStatus?: string;
+    tag?: string;
     sort?: string;
   }>;
 };
@@ -18,13 +20,16 @@ export default async function Home({ searchParams }: HomeProps) {
   const search = params.search?.trim() ?? "";
   const ownedFormat = params.ownedFormat ?? "all";
   const readingStatus = params.readingStatus ?? "all";
+  const tag = params.tag ?? "all";
   const sort = params.sort ?? "recent";
   const books = await getBooks({
     search,
     ownedFormat,
     readingStatus,
+    tag: tag === "all" ? undefined : tag,
     sort,
   });
+  const tags = await getAllTags();
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-6 py-10 md:px-10">
@@ -79,6 +84,8 @@ export default async function Home({ searchParams }: HomeProps) {
         search={search}
         ownedFormat={ownedFormat}
         readingStatus={readingStatus}
+        tag={tag}
+        tags={tags}
         sort={sort}
       />
 
@@ -103,6 +110,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <Link key={book.id} href={`/books/${book.id}`}>
               <BookCard
                 title={book.title}
+                tags={parseBookTags(book.tags)}
                 authors={JSON.parse(book.authors) as string[]}
                 publishedDate={book.publishedDate}
                 coverUrl={book.coverUrl}

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { type BookFormState } from "@/lib/book-form-state";
 import { validateIsbn } from "@/lib/isbn";
+import { parseTagsInput } from "@/lib/tags";
 import {
   DuplicateIsbnError,
   createBookRecord,
@@ -72,6 +73,7 @@ function parseBookInput(formData: FormData) {
     readingStatus: getStringValue(formData, "readingStatus") || "unread",
     notes: emptyToNull(getStringValue(formData, "notes")),
     lookupSource: emptyToNull(getStringValue(formData, "lookupSource")),
+    tags: JSON.stringify(parseTagsInput(getStringValue(formData, "tags"))),
   };
 }
 

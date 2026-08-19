@@ -23,7 +23,9 @@ type BookFormProps = {
     readingStatus?: string;
     notes?: string | null;
     lookupSource?: string | null;
+    tags?: string[];
   };
+  tagSuggestions?: string[];
 };
 
 type LookupResponse = {
@@ -41,7 +43,7 @@ type LookupResponse = {
 const ownedFormats = ["physical", "ebook", "both"];
 const readingStatuses = ["unread", "reading", "read"];
 
-export function BookForm({ mode, action, deleteAction, initialValues }: BookFormProps) {
+export function BookForm({ mode, action, deleteAction, initialValues, tagSuggestions }: BookFormProps) {
   const [formState, formAction, isPending] = useActionState(
     action,
     initialBookFormState,
@@ -55,6 +57,7 @@ export function BookForm({ mode, action, deleteAction, initialValues }: BookForm
   const [readingStatus, setReadingStatus] = useState(initialValues?.readingStatus ?? "unread");
   const [coverUrl, setCoverUrl] = useState(initialValues?.coverUrl ?? "");
   const [notes, setNotes] = useState(initialValues?.notes ?? "");
+  const [tags, setTags] = useState(initialValues?.tags?.join(", ") ?? "");
   const [lookupSource, setLookupSource] = useState(initialValues?.lookupSource ?? "");
   const [metadataIsbn10, setMetadataIsbn10] = useState(initialValues?.isbn10 ?? "");
   const [metadataIsbn13, setMetadataIsbn13] = useState(initialValues?.isbn13 ?? "");
@@ -261,6 +264,29 @@ export function BookForm({ mode, action, deleteAction, initialValues }: BookForm
           placeholder="https://..."
           className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-stone-900 outline-none"
         />
+      </label>
+
+      <label className="grid gap-2" htmlFor="tags">
+        <span className="text-sm font-medium text-stone-700">Tags</span>
+        <input
+          id="tags"
+          name="tags"
+          value={tags}
+          onChange={(event) => setTags(event.target.value)}
+          placeholder="cooking, sf, dutch"
+          list="tag-suggestions"
+          className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-stone-900 outline-none"
+        />
+        {tagSuggestions && tagSuggestions.length > 0 ? (
+          <datalist id="tag-suggestions">
+            {tagSuggestions.map((value) => (
+              <option key={value} value={value} />
+            ))}
+          </datalist>
+        ) : null}
+        <span className="text-xs text-stone-500">
+          Comma-separated. Existing tags autocomplete.
+        </span>
       </label>
 
       <label className="grid gap-2" htmlFor="notes">

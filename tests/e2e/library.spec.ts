@@ -152,6 +152,44 @@ test("can search and filter the library list", async ({ page }) => {
   await expect(page.getByText(`${prefix} Beta`)).not.toBeVisible();
 });
 
+test("tags books and filters the library by tag", async ({ page }) => {
+  const prefix = `Tagged ${Date.now()}`;
+
+  await page.goto("/books/new");
+  await page.locator("#title").fill(`${prefix} Cookbook`);
+  await page.locator("#authors").fill("Tag Author");
+  await page.locator("#tags").fill("cooking, dutch");
+  await page.getByRole("button", { name: "Save book" }).click();
+  await expect(page.getByRole("heading", { name: `${prefix} Cookbook` })).toBeVisible();
+
+  await page.goto("/books/new");
+  await page.locator("#title").fill(`${prefix} Novel`);
+  await page.locator("#authors").fill("Tag Author");
+  await page.getByRole("button", { name: "Save book" }).click();
+  await expect(page.getByRole("heading", { name: `${prefix} Novel` })).toBeVisible();
+
+  await page.goto("/");
+  await page.locator("#search").fill(prefix);
+  await page.locator("#tag").selectOption("cooking");
+  await page.getByRole("button", { name: "Apply filters" }).click();
+
+  await expect(page.getByText(`${prefix} Cookbook`)).toBeVisible();
+  await expect(page.getByText(`${prefix} Novel`)).not.toBeVisible();
+});
+
+test("applies batch tags during bulk import", async ({ page }) => {
+  await page.goto("/import");
+  await page.locator("#import-tags").fill("batch-test");
+  await page.locator("#isbnList").fill("9785555555564");
+  await page.getByRole("button", { name: "Import books" }).click();
+  await expect(page.getByText("Imported 1 of 1 rows")).toBeVisible();
+
+  await page.goto("/");
+  await page.locator("#tag").selectOption("batch-test");
+  await page.getByRole("button", { name: "Apply filters" }).click();
+  await expect(page.getByText("Unknown title (9785555555564)")).toBeVisible();
+});
+
 test("shows per-row results for bulk ISBN import issues", async ({ page }) => {
   const existingIsbn = buildUniqueIsbn13();
   const title = `Existing import duplicate ${Date.now()}`;

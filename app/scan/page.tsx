@@ -1,8 +1,11 @@
 import Link from "next/link";
 
 import { BarcodeScanner } from "@/components/barcode-scanner";
+import { getAllTags } from "@/lib/queries";
 
-export default function ScanPage() {
+export default async function ScanPage() {
+  const tagSuggestions = await getAllTags();
+
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-10 md:px-10">
       <div className="flex items-center justify-between gap-4">
@@ -30,7 +33,7 @@ export default function ScanPage() {
         </p>
       </noscript>
 
-      <BarcodeScanner />
+      <BarcodeScanner tagSuggestions={tagSuggestions} />
     </main>
   );
 }

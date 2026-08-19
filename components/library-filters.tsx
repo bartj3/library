@@ -12,6 +12,8 @@ type LibraryFiltersProps = {
   search: string;
   ownedFormat: string;
   readingStatus: string;
+  tag: string;
+  tags: string[];
   sort: string;
 };
 
@@ -19,6 +21,8 @@ export function LibraryFilters({
   search,
   ownedFormat,
   readingStatus,
+  tag,
+  tags,
   sort,
 }: LibraryFiltersProps) {
   return (
@@ -36,7 +40,7 @@ export function LibraryFilters({
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className="grid gap-2">
           <label className="text-sm font-medium text-stone-700" htmlFor="owned-format">
             Ownership
@@ -68,6 +72,25 @@ export function LibraryFilters({
             {readingStatuses.map((status) => (
               <option key={status} value={status}>
                 {status}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid gap-2">
+          <label className="text-sm font-medium text-stone-700" htmlFor="tag">
+            Tag
+          </label>
+          <select
+            id="tag"
+            name="tag"
+            defaultValue={tag}
+            className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-stone-900 outline-none"
+          >
+            <option value="all">all</option>
+            {tags.map((value) => (
+              <option key={value} value={value}>
+                {value}
               </option>
             ))}
           </select>

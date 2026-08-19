@@ -11,6 +11,7 @@ import {
 } from "@/lib/import-form-state";
 import { validateIsbn } from "@/lib/isbn";
 import { lookupBookMetadata } from "@/lib/book-metadata";
+import { parseTagsInput } from "@/lib/tags";
 import {
   type BookRecord,
   replaceBooks,
@@ -41,6 +42,7 @@ export async function importBooksByIsbn(
   const raw = getStringValue(formData, "isbnList");
   const ownedFormat = getStringValue(formData, "ownedFormat") || "physical";
   const readingStatus = getStringValue(formData, "readingStatus") || "unread";
+  const tags = JSON.stringify(parseTagsInput(getStringValue(formData, "tags")));
   const lines = parseInputLines(raw);
 
   if (lines.length === 0) {
@@ -114,6 +116,7 @@ export async function importBooksByIsbn(
           readingStatus,
           notes: null,
           lookupSource: null,
+          tags,
         });
 
         importedCount += 1;
@@ -146,6 +149,7 @@ export async function importBooksByIsbn(
         readingStatus,
         notes: null,
         lookupSource: metadata.lookupSource,
+        tags,
       });
 
       importedCount += 1;

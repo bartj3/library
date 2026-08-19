@@ -1,9 +1,11 @@
 import { type BookRecord, readBooks } from "@/lib/library-store";
+import { parseBookTags } from "@/lib/tags";
 
 export type LibraryQuery = {
   search?: string;
   ownedFormat?: string;
   readingStatus?: string;
+  tag?: string;
   sort?: string;
 };
 
@@ -19,6 +21,7 @@ export async function getBooks(query: LibraryQuery = {}) {
     query.readingStatus && readingStatuses.has(query.readingStatus)
       ? query.readingStatus
       : undefined;
+  const tag = query.tag?.trim() || undefined;
   const sort = query.sort ?? "recent";
 
   const orderBy =
@@ -45,6 +48,10 @@ export async function getBooks(query: LibraryQuery = {}) {
         return false;
       }
 
+      if (tag && !parseBookTags(book.tags).includes(tag)) {
+        return false;
+      }
+
       if (!normalizedSearch) {
         return true;
       }
@@ -57,6 +64,12 @@ export async function getBooks(query: LibraryQuery = {}) {
       ].some((value) => value.toLowerCase().includes(normalizedSearch));
     })
     .sort((left, right) => compareBooks(left, right, orderBy));
+}
+
+export async function getAllTags() {
+  const books = await readBooks();
+  const tags = new Set(books.flatMap((book) => parseBookTags(book.tags)));
+  return [...tags].sort((left, right) => left.localeCompare(right));
 }
 
 export async function getBookById(id: string) {

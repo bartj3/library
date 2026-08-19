@@ -20,6 +20,7 @@ Do not treat this as a production-ready application.
 - bulk import ISBNs from pasted text or CSV/text files
 - scan book barcodes with a phone or webcam at `/scan`
 - search, filter, and sort your library
+- tag books (comma-separated, autocompleted) and filter by tag; imports and scans can tag a whole batch
 - store the library itself in a versionable JSON file
 
 ## Stack

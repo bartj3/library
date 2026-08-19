@@ -1,5 +1,6 @@
 type BookCardProps = {
   title: string;
+  tags?: string[];
   authors: string[];
   publishedDate?: string | null;
   coverUrl?: string | null;
@@ -9,6 +10,7 @@ type BookCardProps = {
 
 export function BookCard({
   title,
+  tags,
   authors,
   publishedDate,
   coverUrl,
@@ -42,6 +44,19 @@ export function BookCard({
         </div>
 
         <p className="text-sm text-stone-500">{publishedDate ?? "Unknown publication date"}</p>
+
+        {tags && tags.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-900"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
     </article>
   );
