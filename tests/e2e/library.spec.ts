@@ -175,6 +175,12 @@ test("tags books and filters the library by tag", async ({ page }) => {
 
   await expect(page.getByText(`${prefix} Cookbook`)).toBeVisible();
   await expect(page.getByText(`${prefix} Novel`)).not.toBeVisible();
+
+  await page.locator("#tag").selectOption("untagged");
+  await page.getByRole("button", { name: "Apply filters" }).click();
+
+  await expect(page.getByText(`${prefix} Novel`)).toBeVisible();
+  await expect(page.getByText(`${prefix} Cookbook`)).not.toBeVisible();
 });
 
 test("applies batch tags during bulk import", async ({ page }) => {

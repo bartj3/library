@@ -48,7 +48,11 @@ export async function getBooks(query: LibraryQuery = {}) {
         return false;
       }
 
-      if (tag && !parseBookTags(book.tags).includes(tag)) {
+      if (tag === "untagged") {
+        if (parseBookTags(book.tags).length > 0) {
+          return false;
+        }
+      } else if (tag && !parseBookTags(book.tags).includes(tag)) {
         return false;
       }
 
@@ -69,6 +73,8 @@ export async function getBooks(query: LibraryQuery = {}) {
 export async function getAllTags() {
   const books = await readBooks();
   const tags = new Set(books.flatMap((book) => parseBookTags(book.tags)));
+  // "untagged" is a reserved filter value, not a real tag.
+  tags.delete("untagged");
   return [...tags].sort((left, right) => left.localeCompare(right));
 }
 

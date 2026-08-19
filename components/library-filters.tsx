@@ -88,6 +88,7 @@ export function LibraryFilters({
             className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-stone-900 outline-none"
           >
             <option value="all">all</option>
+            <option value="untagged">untagged</option>
             {tags.map((value) => (
               <option key={value} value={value}>
                 {value}
