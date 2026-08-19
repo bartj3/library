@@ -65,6 +65,13 @@ export default async function Home({ searchParams }: HomeProps) {
           >
             Import by ISBN list
           </Link>
+
+          <Link
+            href="/scan"
+            className="inline-flex w-fit rounded-full border border-stone-700 px-5 py-3 text-sm font-semibold text-stone-100 transition-transform hover:-translate-y-0.5"
+          >
+            Scan barcodes
+          </Link>
         </div>
       </section>
 

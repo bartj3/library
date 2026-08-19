@@ -18,6 +18,7 @@ Do not treat this as a production-ready application.
 - add books manually
 - fetch metadata from ISBN
 - bulk import ISBNs from pasted text or CSV/text files
+- scan book barcodes with a phone or webcam at `/scan`
 - search, filter, and sort your library
 - store the library itself in a versionable JSON file
 
@@ -47,6 +48,28 @@ Open:
 ```text
 http://localhost:3000
 ```
+
+### Barcode scanning from a phone
+
+Browsers only allow camera access over HTTPS (or on `localhost`), and Chrome refuses the camera entirely on pages with certificate errors — clicking through the warning is not enough. Set up a locally trusted certificate once with [mkcert](https://github.com/FiloSottile/mkcert):
+
+```bash
+mkcert -install
+mkcert -key-file certificates/localhost-key.pem -cert-file certificates/localhost.pem localhost 127.0.0.1 ::1 <your-machine-ip>
+```
+
+On the phone, download the mkcert root certificate (`mkcert -CAROOT`, also served at `/rootCA.pem` if you copy it into `public/`) and install it via Android's *Install a CA certificate* setting.
+
+Then build and serve production over HTTPS:
+
+```bash
+npm run build
+npm run start:https
+```
+
+Open `https://<your-machine-ip>:3000/scan` on the phone. Scanning uses the native `BarcodeDetector` API where available and falls back to a WASM decoder elsewhere.
+
+> **Warning**: Use the production server for phone testing. Next.js 16.2.1's dev mode (`npm run dev`) silently fails to hydrate on mobile browsers — pages render but buttons do nothing, with no errors anywhere. This cost an evening to figure out. Dev mode with `npm run dev:https` works fine on desktop.
 
 ## Data Storage
 
