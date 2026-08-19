@@ -32,7 +32,12 @@ export async function getBooks(query: LibraryQuery = {}) {
 
   return books
     .filter((book) => {
-      if (ownedFormat && book.ownedFormat !== ownedFormat) {
+      // Books owned in "both" formats match the physical and ebook filters.
+      if (
+        ownedFormat &&
+        book.ownedFormat !== ownedFormat &&
+        book.ownedFormat !== "both"
+      ) {
         return false;
       }
 

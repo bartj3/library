@@ -126,6 +126,13 @@ test("can search and filter the library list", async ({ page }) => {
   await page.locator("#readingStatus").selectOption("read");
   await page.getByRole("button", { name: "Save book" }).click();
 
+  await page.goto("/books/new");
+  await page.locator("#title").fill(`${prefix} Gamma`);
+  await page.locator("#authors").fill("Filter Author");
+  await page.locator("#ownedFormat").selectOption("both");
+  await page.locator("#readingStatus").selectOption("read");
+  await page.getByRole("button", { name: "Save book" }).click();
+
   await page.goto("/");
   await page.locator("#search").fill(prefix);
   await page.locator("#owned-format").selectOption("ebook");
@@ -134,7 +141,15 @@ test("can search and filter the library list", async ({ page }) => {
   await page.getByRole("button", { name: "Apply filters" }).click();
 
   await expect(page.getByText(`${prefix} Beta`)).toBeVisible();
+  // Books owned in both formats count as ebooks (and as physical books).
+  await expect(page.getByText(`${prefix} Gamma`)).toBeVisible();
   await expect(page.getByText(`${prefix} Alpha`)).not.toBeVisible();
+
+  await page.locator("#owned-format").selectOption("both");
+  await page.getByRole("button", { name: "Apply filters" }).click();
+
+  await expect(page.getByText(`${prefix} Gamma`)).toBeVisible();
+  await expect(page.getByText(`${prefix} Beta`)).not.toBeVisible();
 });
 
 test("shows per-row results for bulk ISBN import issues", async ({ page }) => {
